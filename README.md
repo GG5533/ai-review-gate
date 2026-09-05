@@ -1,7 +1,12 @@
 # ai-review-gate
 
-Two models review a coding agent's answer **before it reaches you**, and block
-it if it's wrong.
+Two models review a coding agent's answer and **block the turn if it's wrong**,
+so the agent has to fix it instead of leaving it.
+
+To be precise about what that means: the first draft still streams to your
+terminal. What the gate prevents is a wrong answer being the *final* one — it
+forces a correction rather than filtering before display. No hook can intercept
+before display; see [limitations](#honest-limitations).
 
 Not a linter. Not an eval suite. A `Stop` hook that runs when the agent thinks
 it's finished, hands the answer plus recent context to Codex (GPT) and to a
