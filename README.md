@@ -105,6 +105,10 @@ What's here is a working two-model implementation, the specific prompt that
 keeps its false-positive rate low enough to leave on, and an honest record of
 what it caught.
 
+## Related
+
+**[10 ways your AI feature breaks in production](https://gg5533.github.io/checklist.html)** — production-readiness checklist for AI features. Free, no signup.
+
 MIT.
 
 ---
