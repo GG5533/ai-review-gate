@@ -66,8 +66,8 @@ and wrong about something a reader could check.**
 
 ```
 agent finishes  →  Stop hook fires
-                   ├── Codex (GPT)          ┐ parallel, 120s cap
-                   └── Claude, fresh context ┘
+                   ├── Codex (GPT)          ┐ parallel, ~10s typical
+                   └── Claude, fresh context ┘   (120s cap, then fail open)
                    │
                    ├── both PASS  → turn ends, answer delivered
                    └── either REVISE → turn blocked, critique fed back,
