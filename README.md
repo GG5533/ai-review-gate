@@ -45,11 +45,28 @@ and quietly dropping part of a request.** Those are exactly the failure modes a
 self-review misses, because the model that made the leap doesn't see it as a
 leap.
 
+### Later catches, where the cost of being wrong was public
+
+The table above is from one session. These are from work that was about to be
+published under my name in other people's repositories, which is where a wrong
+claim is expensive:
+
+| What the reviewer caught | Why it mattered |
+|---|---|
+| A notification token registered in the handler but never in the validator's allow-list | The feature I had just written was **unusable** — the form rejected it. My own first test cleared it because it replicated the wrong half of the validator. |
+| Four overclaims in a security advisory already submitted | Two named sinks did not render HTML at all; the report was withdrawn and corrected. |
+| A durability claim resting on unverified call ordering | I asserted two savepoints were equivalent. The reviewer asked what order `drain_before_exit` did things in — it savepoints *before* draining, so they are not. Caught before posting. |
+| Attributing an outcome to `AssertUnwindSafe` itself | The wrapper suppresses a bound; the unsafety comes from what you do after. Wrong mechanism, right conclusion. |
+| Confusing mutation testing with a bug reproducer | Deleting a guard and watching tests fail proves *coverage*, not a defect. A defect needs a test that fails on unmodified code. |
+
+The pattern across all five: **the answer was confident, internally consistent,
+and wrong about something a reader could check.**
+
 ## How it works
 
 ```
 agent finishes  →  Stop hook fires
-                   ├── Codex (GPT)          ┐ parallel, ~10s
+                   ├── Codex (GPT)          ┐ parallel, 120s cap
                    └── Claude, fresh context ┘
                    │
                    ├── both PASS  → turn ends, answer delivered
@@ -102,6 +119,21 @@ USE_LOCAL=0      # optional third seat; set LOCAL_REVIEWER to an executable
 - **Reviewers are wrong sometimes.** The instruction on a block is to fix the
   problem *or* say in one line why the critique is wrong and stand by the
   answer. A gate that can't be argued with just teaches you to disable it.
+  Observed both ways: a reviewer once proposed splitting a case that did not
+  need splitting, because it had the Rust `?` semantics backwards — that
+  correction was rejected, and the reviewer was right about the *other* four
+  things it raised in the same pass.
+- **A reviewer can be rate-limited or hang, and then you have one reviewer,
+  not two.** Both happened in a single day: one CLI hit a usage limit twice,
+  and a manual call to the same tool hung for nearly four hours. The gate
+  itself was unaffected — `run_limited` caps every reviewer at 120s and the
+  hook fails open — but "two models reviewed this" quietly became "one model
+  reviewed this" with no visible signal. If you rely on this, log which
+  reviewers actually answered.
+- **Small prompts survive limits that kill large ones.** The gate's review
+  calls are short and kept working through a rate limit that was rejecting
+  long analysis calls to the same CLI minutes earlier. Useful to know before
+  concluding a reviewer is unavailable.
 
 ## Prior art
 
